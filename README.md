@@ -1,3 +1,6 @@
 # QCsimulator for QCP
 Clone the repo
-there is a example python file that show the example to use this QCsimulator
+
+There is a example.py that show an example to use this QCsimulator
+
+If you have trouble to run it or there are some issuess, plz report that on the Issues channel
