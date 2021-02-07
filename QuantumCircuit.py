@@ -13,6 +13,9 @@ class QuantumCircuit():
         self.qn = qubit_number
         self.state = self.get_initial_state()
     
+    def show_state(self):
+        print(np.transpose(self.state))
+
     def tensor_product(self, V, W):
         result = None
         M_list = []
@@ -41,7 +44,7 @@ class QuantumCircuit():
         return state.reshape(len(state),1)
         
     def apply_hardmard(self, wire_index):
-        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn)
+        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         if self.qn == 1:
             self.state = np.dot(QG.H,self.state)
         else:
@@ -58,7 +61,7 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
             
     def apply_pauliX(self, wire_index):
-        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn)
+        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         if self.qn == 1:
             self.state = np.dot(QG.PX,self.state)  
         else:
@@ -75,7 +78,7 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
     
     def apply_pauliY(self, wire_index):
-        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn)
+        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         if self.qn == 1:
             self.state = np.dot(QG.PY,self.state)  
         else:
@@ -92,7 +95,7 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
     
     def apply_pauliZ(self, wire_index):
-        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn)
+        assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         
         if self.qn == 1:
             self.state = np.dot(QG.PZ,self.state)
@@ -109,8 +112,7 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
             
     def apply_swap(self, wire_index1, wire_index2):
-        assert self.qn>1, 'The curcuit does not have enough qubit to do SWAP gate'
-        assert wire_index1<self.qn or wire_index2<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn)
+        assert wire_index1<self.qn or wire_index2<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         
         if self.qn == 2:
             self.state = np.dot(QG.SWAP,self.state)
@@ -136,9 +138,33 @@ class QuantumCircuit():
     def apply_measurement(self, wire_index):
         pass
     
-    def apply_cnot(self, wire_idnex1, wire_index2):
-        pass
-    
+    def apply_cnot(self, control_qubit, target_qubit):
+        C = np.array([
+                [float('nan'), 0],
+                [0, 1]
+            ])
+        gate_list = []
+        for i in range(self.qn):
+            if i == control_qubit:
+                gate_list.append(C)
+            elif i == target_qubit:
+                gate_list.append(QG.PX)
+            else:
+                gate_list.append(QG.I)
+
+        gate_M = gate_list[0]
+        for i in range(1,self.qn):
+            gate_M = self.tensor_product(gate_M, gate_list[i])
+
+        for i in range(2**self.qn):
+            for j in range(2**self.qn):
+                if np.isnan(gate_M[i][j]):
+                    if i==j:
+                        gate_M[i][j] = 1
+                    else:
+                        gate_M[i][j] = 0
+        self.state = np.dot(gate_M,self.state)
+
     def plot_pr(self):
         temp_x = range(1,2**self.qn + 1)
         x = []
