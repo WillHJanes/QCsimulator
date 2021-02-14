@@ -11,11 +11,33 @@ import numpy as np
 #uncomment the line below to plot the probabilitis of each state
 # my_qc.plot_pr()
 
-qc = QC(3)
-qc.show_state()
-qc.apply_pauliX(0)
-qc.show_state()
-qc.apply_pauliX(1)
-qc.show_state()
-qc.apply_controlZ([0,1],2)
-qc.show_state()
+'''
+an expamle of grove search with 3 qubit
+This link show how it works: https://qiskit.org/textbook/ch-algorithms/grover.html
+'''
+grove_qc = QC(3)
+grove_qc.apply_hardmard(0)
+grove_qc.apply_hardmard(1)
+grove_qc.apply_hardmard(2)
+
+#oracle
+grove_qc.apply_controlZ(2,0)
+grove_qc.apply_controlZ(1,0)
+
+#amplification
+grove_qc.apply_hardmard(0)
+grove_qc.apply_hardmard(1)
+grove_qc.apply_hardmard(2)
+grove_qc.apply_pauliX(0)
+grove_qc.apply_pauliX(1)
+grove_qc.apply_pauliX(2)
+grove_qc.apply_controlZ([1,2],0)
+grove_qc.apply_pauliX(0)
+grove_qc.apply_pauliX(1)
+grove_qc.apply_pauliX(2)
+grove_qc.apply_hardmard(0)
+grove_qc.apply_hardmard(1)
+grove_qc.apply_hardmard(2)
+
+grove_qc.show_state()
+grove_qc.plot_pr()
