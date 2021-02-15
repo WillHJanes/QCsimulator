@@ -14,9 +14,19 @@ class QuantumCircuit():
         self.state = self.get_initial_state()
     
     def show_state(self):
+        '''
+        print the current qubit state
+        '''
         print(np.transpose(self.state))
 
     def tensor_product(self, V, W):
+        '''
+        Input:
+            V: an one two dimentional numpy array
+            W: an one two dimentional numpy array
+        Output:
+            a two dimensional numpy array
+        '''
         result = None
         M_list = []
         for V_row_index in range(V.shape[0]):
@@ -39,11 +49,20 @@ class QuantumCircuit():
         return result
     
     def get_initial_state(self):
+        '''
+        initialize the qubit state given by the number of qubit
+        '''
         state = np.zeros(2**self.qn)
         state[0] = 1
         return state.reshape(len(state),1)
         
     def apply_hardmard(self, wire_index):
+        '''
+        Input:
+            wire_index: Integer
+        Ouput:
+            change the qubit state with hardmard gate
+        '''
         assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
 
         if self.qn == 1:
@@ -62,6 +81,12 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
             
     def apply_pauliX(self, wire_index):
+        '''
+        Input:
+            wire_index: Integer
+        Ouput:
+            change the qubit state with Pauli X gate
+        '''
         assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
 
         if self.qn == 1:
@@ -80,6 +105,12 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
     
     def apply_pauliY(self, wire_index):
+        '''
+        Input:
+            wire_index: Integer
+        Ouput:
+            change the qubit state with Pauli Y gate
+        '''
         assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         if self.qn == 1:
             self.state = np.dot(QG.PY,self.state)  
@@ -97,6 +128,12 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
     
     def apply_pauliZ(self, wire_index):
+        '''
+        Input:
+            wire_index: Integer
+        Ouput:
+            change the qubit state with Pauli Z gate
+        '''
         assert -1<wire_index<self.qn, 'Input argument should be between wire 0 to ' + str(self.qn-1)
         
         if self.qn == 1:
@@ -135,15 +172,19 @@ class QuantumCircuit():
             self.state = np.dot(gate_M,self.state)
     
     def apply_rotation(self, wire_index, angel=0):
-        rotation_gate = np.array([])
-        if self.qn == 1:
-            self.state = np.dot
         pass
     
     def apply_measurement(self, wire_index):
         pass
 
     def apply_controlZ(self, control_qubit, target_qubit):
+        '''
+        Input:
+            control_qubit: Integer or List
+            target_qubit: Integer
+        Output:
+            change the qubit state with control z gate
+        '''
 
         C = np.array([
             [float('nan'), 0],
@@ -182,18 +223,35 @@ class QuantumCircuit():
 
     
     def apply_cnot(self, control_qubit, target_qubit):
+        '''
+        Input:
+            control_qubit: Integer or List
+            target_qubit: Integer
+        Output:
+            change the qubit state with control not gate
+        '''
+
         C = np.array([
                 [float('nan'), 0],
                 [0, 1]
             ])
         gate_list = []
-        for i in range(self.qn):
-            if i == control_qubit:
-                gate_list.append(C)
-            elif i == target_qubit:
-                gate_list.append(QG.PX)
-            else:
-                gate_list.append(QG.I)
+        if isinstance(control_qubit, list):
+            for i in range(self.qn):
+                if i in control_qubit:
+                    gate_list.append(C)
+                elif i == target_qubit:
+                    gate_list.append(QG.PX)
+                else:
+                    gate_list.append(QG.I)
+        else:
+            for i in range(self.qn):
+                if i == control_qubit:
+                    gate_list.append(C)
+                elif i == target_qubit:
+                    gate_list.append(QG.PX)
+                else:
+                    gate_list.append(QG.I)
 
         gate_M = gate_list[0]
         for i in range(1,self.qn):
