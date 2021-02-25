@@ -44,3 +44,12 @@ def SparseMatrix():
 
     def dot(self, matrix: SparseMatrix) -> SparseMatrix:
         return np.dot(self.numpy(), matrix.numpy())
+
+    def get_value(self, r: int, c: int):
+        cols = self.inner_array.shape[1]
+        for i in range(cols):
+            if r == self.inner_array[0][i]:
+                if c == self.inner_array[1][i]:
+                    return self.inner_array[2][i]
+        return 0
+
