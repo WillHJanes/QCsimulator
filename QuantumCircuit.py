@@ -48,31 +48,31 @@ class QuantumCircuit():
             result = np.concatenate((result,M_list[i]),axis=0)
         return result
     
-    def dot_product(self, a, b):
-        '''
-            Input:
-                a: 2d numpy array
-                b: 2d numpy array (same shape as a)
-            Output:
-                final: dot product of a and  as 2d numpy array
-        '''
+    # def dot_product(self, a, b):
+    #     '''
+    #         Input:
+    #             a: 2d numpy array
+    #             b: 2d numpy array (same shape as a)
+    #         Output:
+    #             final: dot product of a and  as 2d numpy array
+    #     '''
     
-        if a.shape == b.shape
-            continue
-        else:
-            print("error: matrices not compatible for dot product")
-            break
+    #     if a.shape == b.shape
+    #         continue
+    #     else:
+    #         print("error: matrices not compatible for dot product")
+    #         break
 
-        final = np.zeros((a.shape))
+    #     final = np.zeros((a.shape))
 
-        for i in range(a.shape[0]):
-            for j in range(b.shape[1]):
-            point = 0
-                for k in range(a.shape[1])
-                point += a[i][k] * b[k][j]
-            final[i][j] = total
+    #     for i in range(a.shape[0]):
+    #         for j in range(b.shape[1]):
+    #         point = 0
+    #             for k in range(a.shape[1])
+    #             point += a[i][k] * b[k][j]
+    #         final[i][j] = total
 
-        return final
+    #     return final
             
     
     def get_initial_state(self):
