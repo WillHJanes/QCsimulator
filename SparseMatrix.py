@@ -4,6 +4,7 @@ from typing import List
 
 
 class SparseMatrix:
+
     def __init__(self, values: List, rows: int, cols: int):
         self.rows = rows
         self.cols = cols
@@ -60,7 +61,7 @@ class SparseMatrix:
         return SparseMatrix(values, self.rows, matrix.cols)
 
     def get_row(self, r: int):
-        # Dictionary of values where values[col] returns value at row r and column col
+        # Dictionary of values where vals[col] returns value at row r and column col
         vals = {}
         for i in range(self.inner_array.shape[1]):
             # The inner array is sorted by row and column. This reduces the number of iterations
@@ -71,7 +72,7 @@ class SparseMatrix:
         return vals
 
     def get_col(self, c: int):
-        # Dictionary of values where values[r] returns value at row r and column c
+        # Dictionary of values where vals[r] returns value at row r and column c
         vals = {}
         for i in range(self.inner_array.shape[1]):
             if self.inner_array[1][i] == c:
@@ -83,7 +84,6 @@ class SparseMatrix:
             # The inner array is sorted by row and column. This reduces the number of iterations
             if r < self.inner_array[0][i]:
                 break
-
             elif r == self.inner_array[0][i]:
                 if c == self.inner_array[1][i]:
                     return self.inner_array[2][i]
@@ -96,11 +96,11 @@ class SparseMatrix:
         return np.unique(self.inner_array[1]).tolist()
 
 
-m1 = np.random.randint(0, 2, (3, 3))
+m1 = np.random.randint(0, 2, (3, 2))
 s1 = SparseMatrix.sparsify(m1)
 assert np.all(m1 == s1.numpy())
 
-m2 = np.random.randint(0, 2, (3, 3))
+m2 = np.random.randint(0, 2, (2, 3))
 s2 = SparseMatrix.sparsify(m2)
 
 numpy_dot = m1.dot(m2)
