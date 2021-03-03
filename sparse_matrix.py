@@ -1,27 +1,33 @@
 """
-This is a class for sparse matrix interface. It holds the values in an inner numpy array in the following format:
-
-r_1 | r_2 | r_3 | ... | rn \n
-c_1 | c_2 | c_3 | ... | cn \n
-v_1 | v_2 | v_3 | ... | vn \n
-
-where r is the row index, c - column index and v is the values stored.
-
-The class implements the dot and tensordot products for sparse matrices, as well as provides conversion tools for
-conversion between numpy array and Sparse Matrix.
+This module holds the Sparse Matrix class
 """
 
 from __future__ import annotations
-import numpy as np
 from typing import List
+import numpy as np
 
 
 class SparseMatrix:
+    """
+    This is a class for sparse matrix interface. It holds the values in an inner
+    numpy array in the following format:
+
+    r_1 | r_2 | r_3 | ... | rn \n
+    c_1 | c_2 | c_3 | ... | cn \n
+    v_1 | v_2 | v_3 | ... | vn \n
+
+    where r is the row index, c - column index and v is the values stored.
+
+    The class implements the dot and tensordot products for sparse matrices, as
+    well as provides conversion tools for conversion between numpy array and Sparse
+    Matrix.
+    """
 
     def __init__(self, values: List, rows: int, cols: int):
         """
         This is the constructor method for the Sparse Matrix \n
-        @param values: List of tuples of (row, column, val) to specify the row and column where the val v is inserted \n
+        @param values: List of tuples of (row, column, val) to specify the row
+        and column where the val v is inserted \n
         @param rows: Number of rows in the matrix \n
         @param cols: Number of rows in the matrix \n
         """
@@ -30,13 +36,14 @@ class SparseMatrix:
         self.inner_array = np.zeros((3, len(values)))
         indexes = set()
         # Sort by row and then by column
-        for i, (r, c, val) in enumerate(sorted(values, key=lambda x: (x[0], x[1]))):
+        for i, (row, col, val) in enumerate(sorted(values, key=lambda x: (x[0], x[1]))):
             # Check that there are no duplicate entries for rth row and cth col
-            assert (r, c) not in indexes, "Found duplicate entry for row {} and column {}".format(r, c)
+            assert (row, col) not in indexes, \
+                "Found duplicate entry for row {} and column {}".format(row, col)
 
-            indexes.add((r, c))
-            self.inner_array[0][i] = r
-            self.inner_array[1][i] = c
+            indexes.add((row, col))
+            self.inner_array[0][i] = row
+            self.inner_array[1][i] = col
             self.inner_array[2][i] = val
 
     @staticmethod
@@ -47,10 +54,10 @@ class SparseMatrix:
         @return: Sparse matrix generated \n
         """
         values = []
-        rs, cs = np.nonzero(matrix)
-        for i in range(len(rs)):
-            r, c = int(rs[i]), int(cs[i])
-            values.append((r, c, matrix[r][c]))
+        rows, cols = np.nonzero(matrix)
+        for i, _ in enumerate(rows):
+            row, col = int(rows[i]), int(cols[i])
+            values.append((row, col, matrix[row][col]))
 
         rows, cols = matrix.shape
         return SparseMatrix(values, rows, cols)
@@ -69,11 +76,11 @@ class SparseMatrix:
         @return: Numpy array \n
         """
         numpy_matrix = np.zeros((self.rows, self.cols))
-        for i in range(self.inner_array.shape[1]):
-            r = int(self.inner_array[0][i])
-            c = int(self.inner_array[1][i])
+        for i in range(self.inner_array.shape[1]):      # pylint: disable=E1136  # pylint/issues/3139
+            row = int(self.inner_array[0][i])
+            col = int(self.inner_array[1][i])
             val = self.inner_array[2][i]
-            numpy_matrix[r][c] = val
+            numpy_matrix[row][col] = val
         return numpy_matrix
 
     def dot(self, matrix: SparseMatrix) -> SparseMatrix:
@@ -86,57 +93,61 @@ class SparseMatrix:
             "Matrices dimensions do not match, {} != {}".format(self.cols, self.rows)
 
         values = []
-        for i, row in enumerate(self.get_nonzero_rows()):
+        for row in self.get_nonzero_rows():
             row_vals = self.get_row(int(row))
-            for j, col in enumerate(matrix.get_nonzero_cols()):
+
+            for col in matrix.get_nonzero_cols():
                 col_vals = matrix.get_col(int(col))
                 val = 0
-                for c in row_vals.keys():
-                    if c in col_vals.keys():
-                        val += row_vals[c] * col_vals[c]
+
+                for c_val in row_vals:
+                    if c_val in col_vals.keys():
+                        val += row_vals[c_val] * col_vals[c_val]
                 values.append((int(row), int(col), val))
 
         return SparseMatrix(values, self.rows, matrix.cols)
 
-    def get_row(self, r: int) -> dict:
+    def get_row(self, row: int) -> dict:
         """
         Get all values in the row r \n
         @param r: Selected row \n
-        @return: Dictionary of values in format vals[col] with value at row r and column col \n
+        @return: Dictionary of values in format vals[col] with value at row row and column col \n
         """
         vals = {}
-        for i in range(self.inner_array.shape[1]):
+        for i in range(self.inner_array.shape[1]):  # pylint: disable=E1136  # pylint/issues/3139
             # The inner array is sorted by row and column. This reduces the number of iterations
-            if r < self.inner_array[0][i]:
+            if row < self.inner_array[0][i]:
                 break
-            elif self.inner_array[0][i] == r:
+
+            if self.inner_array[0][i] == row:
                 vals[self.inner_array[1][i]] = self.inner_array[2][i]
         return vals
 
-    def get_col(self, c: int) -> dict:
+    def get_col(self, col: int) -> dict:
         """
         Get all values in the column c \n
         @param c: Selected column \n
-        @return: Dictionary of values in format vals[r] with value at row r and column c \n
+        @return: Dictionary of values in format vals[r] with value at row rrow and column col \n
         """
         vals = {}
-        for i in range(self.inner_array.shape[1]):
-            if self.inner_array[1][i] == c:
+        for i in range(self.inner_array.shape[1]):  # pylint: disable=E1136  # pylint/issues/3139
+            if self.inner_array[1][i] == col:
                 vals[self.inner_array[0][i]] = self.inner_array[2][i]
         return vals
 
-    def get_value(self, r: int, c: int) -> float:
+    def get_value(self, row: int, col: int) -> float:
         """
         @param r: Selected row \n
         @param c: Selected column \n
         @return: Value at selected row and column \n
         """
-        for i in range(self.inner_array.shape[1]):
+        for i in range(self.inner_array.shape[1]):  # pylint: disable=E1136  # pylint/issues/3139
             # The inner array is sorted by row and column. This reduces the number of iterations
-            if r < self.inner_array[0][i]:
+            if row < self.inner_array[0][i]:
                 break
-            elif r == self.inner_array[0][i]:
-                if c == self.inner_array[1][i]:
+
+            if row == self.inner_array[0][i]:
+                if col == self.inner_array[1][i]:
                     return self.inner_array[2][i]
         return 0
 
