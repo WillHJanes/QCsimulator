@@ -48,31 +48,31 @@ class QuantumCircuit():
             result = np.concatenate((result,M_list[i]),axis=0)
         return result
     
-    def dot_product(self, a, b):
-        '''
-            Input:
-                a: 2d numpy array
-                b: 2d numpy array (same shape as a)
-            Output:
-                final: dot product of a and  as 2d numpy array
-        '''
+    # def dot_product(self, a, b):
+    #     '''
+    #         Input:
+    #             a: 2d numpy array
+    #             b: 2d numpy array (same shape as a)
+    #         Output:
+    #             final: dot product of a and  as 2d numpy array
+    #     '''
     
-        if a.shape == b.shape
-            continue
-        else:
-            print("error: matrices not compatible for dot product")
-            break
+    #     if a.shape == b.shape
+    #         continue
+    #     else:
+    #         print("error: matrices not compatible for dot product")
+    #         break
 
-        final = np.zeros((a.shape))
+    #     final = np.zeros((a.shape))
 
-        for i in range(a.shape[0]):
-            for j in range(b.shape[1]):
-            point = 0
-                for k in range(a.shape[1])
-                point += a[i][k] * b[k][j]
-            final[i][j] = total
+    #     for i in range(a.shape[0]):
+    #         for j in range(b.shape[1]):
+    #         point = 0
+    #             for k in range(a.shape[1])
+    #             point += a[i][k] * b[k][j]
+    #         final[i][j] = total
 
-        return final
+    #     return final
             
     
     def get_initial_state(self):
@@ -197,12 +197,6 @@ class QuantumCircuit():
             for i in range(1, self.qn-1):
                 gate_M = self.tensor_product(gate_M, gate_list[i])
             self.state = np.dot(gate_M,self.state)
-    
-    def apply_rotation(self, wire_index, angel=0):
-        pass
-    
-    def apply_measurement(self, wire_index):
-        pass
 
     def apply_controlZ(self, control_qubit, target_qubit):
         '''
@@ -293,17 +287,44 @@ class QuantumCircuit():
                         gate_M[i][j] = 0
         self.state = np.dot(gate_M,self.state)
 
+    def apply_grover_oracle(self,marks):
+        I = np.eye(2**self.qn)
+        oracle = I
+        if isinstance(marks, int):
+            oracle[marks][marks] = -1
+        else:
+            for mark in marks:
+                oracle[mark][mark] = -1
+        self.state = np.dot(oracle, self.state)
+
+    def apply_amplification(self):
+        s = np.zeros(2**self.qn)
+        s[0] = 1
+        gate_list = []
+        for i in range(self.qn):
+            gate_list.append(QG.H)
+        
+        H = gate_list[0]
+        for i in range(1,self.qn):
+            H = self.tensor_product(H, gate_list[i])
+        s = np.dot(H,s).reshape(2**self.qn,1)
+        diffuser = 2*self.tensor_product(np.transpose(s),s) - np.eye(2**self.qn)
+        self.state = np.dot(diffuser,self.state)
+
+
     def plot_pr(self):
         temp_x = range(1,2**self.qn + 1)
         x = []
         for elem in temp_x:
-            x.append(str(elem))
+            x.append(str(elem-1))
         y = []
         for i in range(self.state.shape[0]):
             y.append((self.state[i][0])**2)
         plt.style.use('seaborn')
         plt.bar(x, y, width=0.5)
         plt.tick_params(axis='both', labelsize=15)
+        if self.qn > 4:
+            plt.tick_params(axis='x', labelsize=10)
         plt.ylim(0, 1)
         plt.ylabel('Probability', fontsize=15) 
         plt.xlabel('State', fontsize=15)
