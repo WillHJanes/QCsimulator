@@ -4,8 +4,25 @@ from typing import List
 
 
 class SparseMatrix:
+    """
+    This is a class for sparse matrix interface. It holds the values in an inner numpy array in the following format:
+
+    r1 | r2 | r3 | ... | rn
+    c1 | c2 | c3 | ... | cn
+    v1 | v2 | v3 | ... | vn
+
+    where r is the row index, c - column index and v is the values stored.
+    The class implements the dot and tensordot products for sparse matrices, as well as provides conversion tools for
+    conversion between numpy array and Sparse Matrix.
+    """
 
     def __init__(self, values: List, rows: int, cols: int):
+        """
+        This is the constructor method for the Sparse Matrix
+        @param values: List of tuples of (row, column, val) to specify the row and column where the val v is inserted
+        @param rows: Number of rows in the matrix
+        @param cols: Number of rows in the matrix
+        """
         self.rows = rows
         self.cols = cols
         self.inner_array = np.zeros((3, len(values)))
@@ -22,6 +39,11 @@ class SparseMatrix:
 
     @staticmethod
     def sparsify(matrix: np.array) -> SparseMatrix:
+        """
+        Static method for generating Sparse Matrix for numpy matrix
+        @param matrix: Numpy matrix
+        @return: Sparse matrix generated
+        """
         values = []
         rs, cs = np.nonzero(matrix)
         for i in range(len(rs)):
@@ -32,9 +54,18 @@ class SparseMatrix:
         return SparseMatrix(values, rows, cols)
 
     def tensordot(self, matrix: SparseMatrix) -> SparseMatrix:
+        """
+        Tensor product method for Sparse Matrices
+        @param matrix: Sparse Matrix to be dotted with
+        @return: Tensor product of the Sparse Matrices
+        """
         return SparseMatrix.sparsify(np.kron(self.numpy(), matrix.numpy()))
 
     def numpy(self) -> np.array:
+        """
+        Convert Sparse Matrix to numpy array
+        @return: Numpy array
+        """
         numpy_matrix = np.zeros((self.rows, self.cols))
         for i in range(self.inner_array.shape[1]):
             r = int(self.inner_array[0][i])
@@ -44,6 +75,11 @@ class SparseMatrix:
         return numpy_matrix
 
     def dot(self, matrix: SparseMatrix) -> SparseMatrix:
+        """
+        Dot product between two Sparse Matrices
+        @param matrix: Sparse Matrix to be dotted with
+        @return: Result Sparse Matrix
+        """
         assert self.cols == matrix.rows, \
             "Matrices dimensions do not match, {} != {}".format(self.cols, self.rows)
 
@@ -60,8 +96,12 @@ class SparseMatrix:
 
         return SparseMatrix(values, self.rows, matrix.cols)
 
-    def get_row(self, r: int):
-        # Dictionary of values where vals[col] returns value at row r and column col
+    def get_row(self, r: int) -> dict:
+        """
+        Get all values in the row r
+        @param r: Selected row
+        @return: Dictionary of values in format vals[col] with value at row r and column col
+        """
         vals = {}
         for i in range(self.inner_array.shape[1]):
             # The inner array is sorted by row and column. This reduces the number of iterations
@@ -71,15 +111,24 @@ class SparseMatrix:
                 vals[self.inner_array[1][i]] = self.inner_array[2][i]
         return vals
 
-    def get_col(self, c: int):
-        # Dictionary of values where vals[r] returns value at row r and column c
+    def get_col(self, c: int) -> dict:
+        """
+        Get all values in the column c
+        @param c: Selected column
+        @return: Dictionary of values in format vals[r] with value at row r and column c
+        """
         vals = {}
         for i in range(self.inner_array.shape[1]):
             if self.inner_array[1][i] == c:
                 vals[self.inner_array[0][i]] = self.inner_array[2][i]
         return vals
 
-    def get_value(self, r: int, c: int):
+    def get_value(self, r: int, c: int) -> float:
+        """
+        @param r: Selected row
+        @param c: Selected column
+        @return: Value at selected row and column
+        """
         for i in range(self.inner_array.shape[1]):
             # The inner array is sorted by row and column. This reduces the number of iterations
             if r < self.inner_array[0][i]:
@@ -89,10 +138,18 @@ class SparseMatrix:
                     return self.inner_array[2][i]
         return 0
 
-    def get_nonzero_rows(self) -> List:
+    def get_nonzero_rows(self) -> List[float]:
+        """
+        Get all rows that have entries
+        @return: List of rows
+        """
         return np.unique(self.inner_array[0]).tolist()
 
-    def get_nonzero_cols(self) -> List:
+    def get_nonzero_cols(self) -> List[float]:
+        """
+        Get all columns that have entries
+        @return: List of all columns
+        """
         return np.unique(self.inner_array[1]).tolist()
 
 
