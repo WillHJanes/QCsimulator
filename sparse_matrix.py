@@ -1,27 +1,29 @@
+"""
+This is a class for sparse matrix interface. It holds the values in an inner numpy array in the following format:
+
+r_1 | r_2 | r_3 | ... | rn \n
+c_1 | c_2 | c_3 | ... | cn \n
+v_1 | v_2 | v_3 | ... | vn \n
+
+where r is the row index, c - column index and v is the values stored.
+
+The class implements the dot and tensordot products for sparse matrices, as well as provides conversion tools for
+conversion between numpy array and Sparse Matrix.
+"""
+
 from __future__ import annotations
 import numpy as np
 from typing import List
 
 
 class SparseMatrix:
-    """
-    This is a class for sparse matrix interface. It holds the values in an inner numpy array in the following format:
-
-    r1 | r2 | r3 | ... | rn
-    c1 | c2 | c3 | ... | cn
-    v1 | v2 | v3 | ... | vn
-
-    where r is the row index, c - column index and v is the values stored.
-    The class implements the dot and tensordot products for sparse matrices, as well as provides conversion tools for
-    conversion between numpy array and Sparse Matrix.
-    """
 
     def __init__(self, values: List, rows: int, cols: int):
         """
-        This is the constructor method for the Sparse Matrix
-        @param values: List of tuples of (row, column, val) to specify the row and column where the val v is inserted
-        @param rows: Number of rows in the matrix
-        @param cols: Number of rows in the matrix
+        This is the constructor method for the Sparse Matrix \n
+        @param values: List of tuples of (row, column, val) to specify the row and column where the val v is inserted \n
+        @param rows: Number of rows in the matrix \n
+        @param cols: Number of rows in the matrix \n
         """
         self.rows = rows
         self.cols = cols
@@ -40,9 +42,9 @@ class SparseMatrix:
     @staticmethod
     def sparsify(matrix: np.array) -> SparseMatrix:
         """
-        Static method for generating Sparse Matrix for numpy matrix
-        @param matrix: Numpy matrix
-        @return: Sparse matrix generated
+        Static method for generating Sparse Matrix for numpy matrix \n
+        @param matrix: Numpy matrix \n
+        @return: Sparse matrix generated \n
         """
         values = []
         rs, cs = np.nonzero(matrix)
@@ -55,16 +57,16 @@ class SparseMatrix:
 
     def tensordot(self, matrix: SparseMatrix) -> SparseMatrix:
         """
-        Tensor product method for Sparse Matrices
-        @param matrix: Sparse Matrix to be dotted with
-        @return: Tensor product of the Sparse Matrices
+        Tensor product method for Sparse Matrices \n
+        @param matrix: Sparse Matrix to be dotted with \n
+        @return: Tensor product of the Sparse Matrices \n
         """
         return SparseMatrix.sparsify(np.kron(self.numpy(), matrix.numpy()))
 
     def numpy(self) -> np.array:
         """
-        Convert Sparse Matrix to numpy array
-        @return: Numpy array
+        Convert Sparse Matrix to numpy array \n
+        @return: Numpy array \n
         """
         numpy_matrix = np.zeros((self.rows, self.cols))
         for i in range(self.inner_array.shape[1]):
@@ -76,9 +78,9 @@ class SparseMatrix:
 
     def dot(self, matrix: SparseMatrix) -> SparseMatrix:
         """
-        Dot product between two Sparse Matrices
-        @param matrix: Sparse Matrix to be dotted with
-        @return: Result Sparse Matrix
+        Dot product between two Sparse Matrices \n
+        @param matrix: Sparse Matrix to be dotted with \n
+        @return: Result Sparse Matrix \n
         """
         assert self.cols == matrix.rows, \
             "Matrices dimensions do not match, {} != {}".format(self.cols, self.rows)
@@ -98,9 +100,9 @@ class SparseMatrix:
 
     def get_row(self, r: int) -> dict:
         """
-        Get all values in the row r
-        @param r: Selected row
-        @return: Dictionary of values in format vals[col] with value at row r and column col
+        Get all values in the row r \n
+        @param r: Selected row \n
+        @return: Dictionary of values in format vals[col] with value at row r and column col \n
         """
         vals = {}
         for i in range(self.inner_array.shape[1]):
@@ -113,9 +115,9 @@ class SparseMatrix:
 
     def get_col(self, c: int) -> dict:
         """
-        Get all values in the column c
-        @param c: Selected column
-        @return: Dictionary of values in format vals[r] with value at row r and column c
+        Get all values in the column c \n
+        @param c: Selected column \n
+        @return: Dictionary of values in format vals[r] with value at row r and column c \n
         """
         vals = {}
         for i in range(self.inner_array.shape[1]):
@@ -125,9 +127,9 @@ class SparseMatrix:
 
     def get_value(self, r: int, c: int) -> float:
         """
-        @param r: Selected row
-        @param c: Selected column
-        @return: Value at selected row and column
+        @param r: Selected row \n
+        @param c: Selected column \n
+        @return: Value at selected row and column \n
         """
         for i in range(self.inner_array.shape[1]):
             # The inner array is sorted by row and column. This reduces the number of iterations
@@ -140,41 +142,37 @@ class SparseMatrix:
 
     def get_nonzero_rows(self) -> List[float]:
         """
-        Get all rows that have entries
-        @return: List of rows
+        Get all rows that have entries \n
+        @return: List of rows \n
         """
         return np.unique(self.inner_array[0]).tolist()
 
     def get_nonzero_cols(self) -> List[float]:
         """
-        Get all columns that have entries
-        @return: List of all columns
+        Get all columns that have entries \n
+        @return: List of all columns \n
         """
         return np.unique(self.inner_array[1]).tolist()
 
 
-m1 = np.random.randint(0, 2, (3, 2))
-s1 = SparseMatrix.sparsify(m1)
-assert np.all(m1 == s1.numpy())
-
-m2 = np.random.randint(0, 2, (2, 3))
-s2 = SparseMatrix.sparsify(m2)
-
-numpy_dot = m1.dot(m2)
-sparse_dot = s1.dot(s2)
-assert np.all(numpy_dot == sparse_dot.numpy())
-
-assert np.all(np.kron(s2.numpy(), s1.numpy()) == s2.tensordot(s1).numpy())
-
-dim = 4
-m3 = SparseMatrix([(0, 0, 1), (2, 1, 1), (1, 1, 2)], dim, dim)
-m4 = np.zeros((dim, dim))
-m4[0][0] = 1
-m4[2][1] = 1
-m4[1][1] = 2
-
-assert np.all(m3.numpy() == m4)
-
-
-
-
+# m1 = np.random.randint(0, 2, (3, 2))
+# s1 = SparseMatrix.sparsify(m1)
+# assert np.all(m1 == s1.numpy())
+#
+# m2 = np.random.randint(0, 2, (2, 3))
+# s2 = SparseMatrix.sparsify(m2)
+#
+# numpy_dot = m1.dot(m2)
+# sparse_dot = s1.dot(s2)
+# assert np.all(numpy_dot == sparse_dot.numpy())
+#
+# assert np.all(np.kron(s2.numpy(), s1.numpy()) == s2.tensordot(s1).numpy())
+#
+# dim = 4
+# m3 = SparseMatrix([(0, 0, 1), (2, 1, 1), (1, 1, 2)], dim, dim)
+# m4 = np.zeros((dim, dim))
+# m4[0][0] = 1
+# m4[2][1] = 1
+# m4[1][1] = 2
+#
+# assert np.all(m3.numpy() == m4)
