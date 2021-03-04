@@ -15,29 +15,51 @@ import numpy as np
 an expamle of grove search with 3 qubit
 This link show how it works: https://qiskit.org/textbook/ch-algorithms/grover.html
 '''
-grove_qc = QC(3)
-grove_qc.apply_hardmard(0)
-grove_qc.apply_hardmard(1)
-grove_qc.apply_hardmard(2)
+# grover_qc = QC(3)
+# grover_qc.apply_hardmard(0)
+# grover_qc.apply_hardmard(1)
+# grover_qc.apply_hardmard(2)
 
-#oracle
-grove_qc.apply_controlZ(2,0)
-grove_qc.apply_controlZ(1,0)
+# #oracle
+# grover_qc.apply_controlZ(2,0)
+# grover_qc.apply_controlZ(1,0)
 
-#amplification
-grove_qc.apply_hardmard(0)
-grove_qc.apply_hardmard(1)
-grove_qc.apply_hardmard(2)
-grove_qc.apply_pauliX(0)
-grove_qc.apply_pauliX(1)
-grove_qc.apply_pauliX(2)
-grove_qc.apply_controlZ([1,2],0)
-grove_qc.apply_pauliX(0)
-grove_qc.apply_pauliX(1)
-grove_qc.apply_pauliX(2)
-grove_qc.apply_hardmard(0)
-grove_qc.apply_hardmard(1)
-grove_qc.apply_hardmard(2)
+# #amplification
+# grover_qc.apply_hardmard(0)
+# grover_qc.apply_hardmard(1)
+# grover_qc.apply_hardmard(2)
+# grover_qc.apply_pauliX(0)
+# grover_qc.apply_pauliX(1)
+# grover_qc.apply_pauliX(2)
+# grover_qc.apply_controlZ([1,2],0)
+# grover_qc.apply_pauliX(0)
+# grover_qc.apply_pauliX(1)
+# grover_qc.apply_pauliX(2)
+# grover_qc.apply_hardmard(0)
+# grover_qc.apply_hardmard(1)
+# grover_qc.apply_hardmard(2)
 
-grove_qc.show_state()
-grove_qc.plot_pr()
+# grover_qc.show_state()
+# grover_qc.plot_pr()
+
+'''
+Try new method apply_grover_oracle() and apply_amplification()
+'''
+my_qc = QC(5)
+my_qc.apply_hardmard(0)
+my_qc.apply_hardmard(1)
+my_qc.apply_hardmard(2)
+my_qc.apply_hardmard(3)
+my_qc.apply_hardmard(4)
+
+my_qc.apply_grover_oracle(2)
+my_qc.apply_amplification()
+my_qc.apply_grover_oracle(2)
+my_qc.apply_amplification()
+my_qc.apply_grover_oracle(2)
+my_qc.apply_amplification()
+my_qc.apply_grover_oracle(2)
+my_qc.apply_amplification()
+my_qc.apply_grover_oracle(2)
+my_qc.apply_amplification()
+my_qc.plot_pr()
